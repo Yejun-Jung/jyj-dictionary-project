@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>네이버 백과사전 검색</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    <script>
+        function toggleFav(btn) {
+            const title = btn.getAttribute('data-title');
+            const description = btn.getAttribute('data-description');
+            const link = btn.getAttribute('data-link');
+            const thumbnail = btn.getAttribute('data-thumbnail');
+
+            fetch('/api/favorites', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: title, description: description, link: link, thumbnail: thumbnail })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.action === 'added') {
+                    btn.classList.add('active');
+                    btn.innerText = '★';
+                } else {
+                    btn.classList.remove('active');
+                    btn.innerText = '☆';
+                }
+            })
+            .catch(err => {
+                console.error("즐겨찾기 토글 중 오류 발생:", err);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>지식백과 검색기</h1>
+            <a href="/favorites" class="nav-btn">⭐ 내 즐겨찾기 목록</a>
+        </div>
+        
+        <form class="search-box" action="/search" method="GET">
+            <input type="text" name="query" placeholder="궁금한 지식백과 표제어를 입력하세요." value="{{ query }}" required>
+            <button type="submit">검색</button>
+        </form>
+
+        {% if query %}
+            <div class="result-info">
+                '<span>{{ query }}</span>'에 대한 검색 결과입니다.
+            </div>
+        {% endif %}
+
+        {% for item in items %}
+        <div class="card">
+            <button class="fav-btn {% if item.link in fav_links %}active{% endif %}" 
+                    data-title="{{ item.title }}"
+                    data-description="{{ item.description }}"
+                    data-link="{{ item.link }}"
+                    data-thumbnail="{{ item.thumbnail }}"
+                    onclick="toggleFav(this)">
+                {% if item.link in fav_links %}★{% else %}☆{% endif %}
+            </button>
+            {% if item.thumbnail %}
+            <img src="{{ item.thumbnail }}" alt="썸네일 이미지" referrerpolicy="no-referrer">
+            {% endif %}
+            <div class="card-content">
+                <h3 class="with-fav">{{ item.title }}</h3>
+                <p class="short-desc">{{ item.description }}</p>
+                <a href="{{ item.link }}" target="_blank">상세 내용 보기 ↗</a>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if query and items|length == 0 %}
+        <div class="empty-state">
+            <span class="icon">🔍</span>
+            <h2>검색 결과가 없습니다</h2>
+            <p>'{{ query }}'에 대한 정확한 표제어 매칭 자료를 찾지 못했습니다. 철자를 확인하거나 다른 검색어를 입력해 보세요.</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html> 

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 즐겨찾기 - 백과사전</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+
+    <script>
+        function removeFav(link) {
+            fetch('/api/favorites', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: "", description: "", link: link, thumbnail: "" })
+            })
+            .then(response => response.json())
+            .then(data => {
+                window.location.reload();
+            })
+            .catch(err => {
+                console.error("즐겨찾기 삭제 중 오류 발생:", err);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⭐ 스크랩 보관함</h1>
+            {% if last_query %}
+            <a href="/search?query={{ last_query }}" class="nav-btn">← 검색 화면으로</a>
+            {% else %}
+            <a href="/" class="nav-btn">← 검색 화면으로</a>
+            {% endif %}
+        </div>
+
+        {% if items|length == 0 %}
+        <div class="empty-state favorites-empty">
+            <span class="icon">📄</span>
+            <h2>스크랩한 자료가 없습니다</h2>
+            <p>지식백과 검색기에서 유용한 표제어를 찾아 별표(★)를 눌러보세요.</p>
+            {% if last_query %}
+            <a href="/search?query={{ last_query }}" class="action-btn">🔍 자료 스크랩하러 가기</a>
+            {% else %}
+            <a href="/" class="action-btn">🔍 자료 스크랩하러 가기</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% for item in items %}
+        <div class="card">
+            <button class="delete-btn" onclick="removeFav('{{ item.link }}')">삭제</button>
+            {% if item.thumbnail %}
+            <img src="{{ item.thumbnail }}" alt="썸네일 이미지" referrerpolicy="no-referrer">
+            {% endif %}
+            <div class="card-content">
+                <h3 class="with-delete">{{ item.title }}</h3>
+                <p class="short-desc">{{ item.description }}</p>
+                <a href="{{ item.link }}" target="_blank">상세 내용 보기 ↗</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
