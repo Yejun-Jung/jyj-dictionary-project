@@ -26,6 +26,8 @@ def search_naver_encyc(keyword):
         api_desc = re.sub(r'<[^>]+>', '', item["description"])
         link = item["link"]
         thumbnail = item.get("thumbnail", "")
+        if thumbnail.startswith("http://"):
+            thumbnail = thumbnail.replace("http://", "https://", 1)
 
         detail_desc = api_desc
         if link:
