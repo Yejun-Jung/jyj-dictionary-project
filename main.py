@@ -33,9 +33,8 @@ class FavoriteItem(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={"items": [], "query": "", "fav_links": []},
+        "index.html",
+        {"request": request, "items": [], "query": "", "fav_links": []},
     )
 
 
@@ -52,9 +51,8 @@ async def search(request: Request, query: str = None):
     fav_links = [fav["link"] for fav in favorites]
 
     response = templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={"items": items, "query": query, "fav_links": fav_links},
+        "index.html",
+        {"request": request, "items": items, "query": query, "fav_links": fav_links},
     )
 
     if query:
@@ -88,9 +86,8 @@ async def favorites_page(request: Request):
     raw_cookie = request.cookies.get("last_query", "")
     last_query = unquote(raw_cookie)
     return templates.TemplateResponse(
-        request=request,
-        name="favorites.html",
-        context={"items": favorites, "last_query": last_query},
+        "favorites.html",
+        {"request": request, "items": favorites, "last_query": last_query},
     )
 
 
