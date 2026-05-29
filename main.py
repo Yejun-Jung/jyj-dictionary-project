@@ -1,10 +1,11 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import uvicorn
+import requests as http_requests
 from urllib.parse import quote, unquote
 
 from encyc_scraper import search_naver_encyc
@@ -77,6 +78,20 @@ async def toggle_favorite(item: FavoriteItem):
         action = "added"
 
     return {"status": "success", "action": action}
+
+
+@app.get("/api/image-proxy")
+async def image_proxy(url: str):
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Referer": "https://naver.com",
+        }
+        resp = http_requests.get(url, headers=headers, timeout=5)
+        content_type = resp.headers.get("content-type", "image/jpeg")
+        return Response(content=resp.content, media_type=content_type)
+    except Exception:
+        return Response(status_code=404)
 
 
 @app.get("/favorites", response_class=HTMLResponse)

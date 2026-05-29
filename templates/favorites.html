@@ -51,7 +51,7 @@
         <div class="card">
             <button class="delete-btn" onclick="removeFav('{{ item.link }}')">삭제</button>
             {% if item.thumbnail %}
-            <img src="{{ item.thumbnail }}" alt="썸네일 이미지" referrerpolicy="no-referrer">
+            <img src="/api/image-proxy?url={{ item.thumbnail | urlencode }}" alt="썸네일 이미지">
             {% endif %}
             <div class="card-content">
                 <h3 class="with-delete">{{ item.title }}</h3>

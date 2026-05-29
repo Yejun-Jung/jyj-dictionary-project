@@ -62,7 +62,7 @@
                 {% if item.link in fav_links %}★{% else %}☆{% endif %}
             </button>
             {% if item.thumbnail %}
-            <img src="{{ item.thumbnail }}" alt="썸네일 이미지" referrerpolicy="no-referrer">
+            <img src="/api/image-proxy?url={{ item.thumbnail | urlencode }}" alt="썸네일 이미지">
             {% endif %}
             <div class="card-content">
                 <h3 class="with-fav">{{ item.title }}</h3>
