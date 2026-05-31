@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import uvicorn
 import requests as http_requests
-from urllib.parse import quote, unquote
+from urllib.parse import quote, unquote, quote as url_quote
 
 from encyc_scraper import search_naver_encyc
 from models.database import mongodb
@@ -22,6 +22,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+templates.env.filters["url_quote"] = lambda s: url_quote(str(s), safe="")
+
+
+def render(template_name: str, request: Request, **context) -> HTMLResponse:
+    """Starlette 버전에 무관하게 동작하는 템플릿 렌더 함수"""
+    template = templates.env.get_template(template_name)
+    html = template.render(request=request, url_for=request.url_for, **context)
+    return HTMLResponse(content=html)
 
 
 class FavoriteItem(BaseModel):
@@ -33,10 +41,7 @@ class FavoriteItem(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "items": [], "query": "", "fav_links": []},
-    )
+    return render("index.html", request, items=[], query="", fav_links=[])
 
 
 @app.get("/search", response_class=HTMLResponse)
@@ -51,14 +56,10 @@ async def search(request: Request, query: str = None):
     favorites = list(db.favorites.find({}, {"_id": False}))
     fav_links = [fav["link"] for fav in favorites]
 
-    response = templates.TemplateResponse(
-        "index.html",
-        {"request": request, "items": items, "query": query, "fav_links": fav_links},
-    )
+    response = render("index.html", request, items=items, query=query, fav_links=fav_links)
 
     if query:
-        encoded_query = quote(query)
-        response.set_cookie(key="last_query", value=encoded_query)
+        response.set_cookie(key="last_query", value=quote(query))
 
     return response
 
@@ -80,6 +81,22 @@ async def toggle_favorite(item: FavoriteItem):
     return {"status": "success", "action": action}
 
 
+@app.get("/api/data")
+async def get_data():
+    """수집한 백과사전 데이터를 JSON 형태로 반환"""
+    db = mongodb.get_db()
+    items = list(db.encyclopedia.find({}, {"_id": False}))
+    return items
+
+
+@app.get("/api/favorites/data")
+async def get_favorites_data():
+    """즐겨찾기 데이터를 JSON 형태로 반환"""
+    db = mongodb.get_db()
+    items = list(db.favorites.find({}, {"_id": False}))
+    return items
+
+
 @app.get("/api/image-proxy")
 async def image_proxy(url: str):
     try:
@@ -98,12 +115,8 @@ async def image_proxy(url: str):
 async def favorites_page(request: Request):
     db = mongodb.get_db()
     favorites = list(db.favorites.find({}, {"_id": False}))
-    raw_cookie = request.cookies.get("last_query", "")
-    last_query = unquote(raw_cookie)
-    return templates.TemplateResponse(
-        "favorites.html",
-        {"request": request, "items": favorites, "last_query": last_query},
-    )
+    last_query = unquote(request.cookies.get("last_query", ""))
+    return render("favorites.html", request, items=favorites, last_query=last_query)
 
 
 if __name__ == "__main__":

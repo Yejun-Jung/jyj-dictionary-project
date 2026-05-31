@@ -1,8 +1,22 @@
+import base64
 import requests
 import re
 from bs4 import BeautifulSoup
 from config import NAVER_CLIENT_ID, NAVER_CLIENT_SECRET
 from models.database import mongodb
+
+
+def download_image_as_base64(url, headers):
+    """이미지 URL을 다운받아 Base64 data URL로 변환. 실패 시 원본 URL 반환"""
+    try:
+        resp = requests.get(url, headers=headers, timeout=5)
+        if resp.status_code == 200:
+            content_type = resp.headers.get("content-type", "image/jpeg").split(";")[0]
+            b64 = base64.b64encode(resp.content).decode("utf-8")
+            return f"data:{content_type};base64,{b64}"
+    except Exception as e:
+        print(f"Image download failed for {url}: {e}")
+    return ""
 
 
 def search_naver_encyc(keyword):
@@ -25,9 +39,10 @@ def search_naver_encyc(keyword):
         title = re.sub(r'<[^>]+>', '', item["title"])
         api_desc = re.sub(r'<[^>]+>', '', item["description"])
         link = item["link"]
-        thumbnail = item.get("thumbnail", "")
-        if thumbnail.startswith("http://"):
-            thumbnail = thumbnail.replace("http://", "https://", 1)
+        thumbnail_url = item.get("thumbnail", "")
+
+        # 스크래핑 시점(로컬/한국 IP)에 이미지를 다운받아 Base64로 변환
+        thumbnail = download_image_as_base64(thumbnail_url, session_headers) if thumbnail_url else ""
 
         detail_desc = api_desc
         if link:
@@ -40,7 +55,7 @@ def search_naver_encyc(keyword):
                     content_div = soup.select_one("#size_ct")
                     if not content_div:
                         content_div = soup.select_one(".size_ct_prt")
-                        
+
                     if content_div:
                         text_content = content_div.get_text().strip()
                         text_content = re.sub(r'\s+', ' ', text_content)
@@ -61,4 +76,3 @@ def search_naver_encyc(keyword):
     mongodb.db.encyclopedia.drop()
     if encyc_items:
         mongodb.db.encyclopedia.insert_many(encyc_items)
-
