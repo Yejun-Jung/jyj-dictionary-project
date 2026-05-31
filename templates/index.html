@@ -31,6 +31,12 @@
                 console.error("즐겨찾기 토글 중 오류 발생:", err);
             });
         }
+
+        function showLoading() {
+            document.getElementById('loading-msg').style.display = 'flex';
+            document.querySelector('.search-box button').disabled = true;
+            document.querySelector('.search-box button').innerText = '검색 중...';
+        }
     </script>
 </head>
 <body>
@@ -40,10 +46,18 @@
             <a href="/favorites" class="nav-btn">⭐ 내 즐겨찾기 목록</a>
         </div>
         
-        <form class="search-box" action="/search" method="GET">
+        <form class="search-box" action="/search" method="GET" onsubmit="showLoading()">
             <input type="text" name="query" placeholder="궁금한 지식백과 표제어를 입력하세요." value="{{ query }}" required>
             <button type="submit">검색</button>
         </form>
+
+        <div id="loading-msg" style="display:none; align-items:center; justify-content:center; gap:12px; padding:40px; color:#4f46e5; font-weight:600; font-size:15px;">
+            <span style="display:inline-block; width:20px; height:20px; border:3px solid #e0e7ff; border-top-color:#4f46e5; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
+            검색 중입니다...
+        </div>
+        <style>
+            @keyframes spin { to { transform: rotate(360deg); } }
+        </style>
 
         {% if query %}
             <div class="result-info">
