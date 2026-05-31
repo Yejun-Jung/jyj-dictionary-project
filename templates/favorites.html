@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내 즐겨찾기 - 백과사전</title>
+    <title>내 즐겨찾기</title>
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
 
     <script>
@@ -27,11 +27,7 @@
     <div class="container">
         <div class="header">
             <h1>⭐ 내 즐겨찾기</h1>
-            {% if last_query %}
-            <a href="/search?query={{ last_query }}" class="nav-btn">← 검색 화면으로</a>
-            {% else %}
-            <a href="/" class="nav-btn">← 검색 화면으로</a>
-            {% endif %}
+            <button onclick="history.back()" class="nav-btn">← 검색 화면으로</button>
         </div>
 
         {% if items|length == 0 %}
@@ -39,11 +35,7 @@
             <span class="icon">📄</span>
             <h2>즐겨찾기한 자료가 없습니다</h2>
             <p>지식백과 검색기에서 유용한 표제어를 찾아 별표(★)를 눌러보세요.</p>
-            {% if last_query %}
-            <a href="/search?query={{ last_query }}" class="action-btn">🔍 자료 스크랩하러 가기</a>
-            {% else %}
-            <a href="/" class="action-btn">🔍 자료 스크랩하러 가기</a>
-            {% endif %}
+            <button onclick="history.back()" class="action-btn">🔍 자료 스크랩하러 가기</button>
         </div>
         {% endif %}
 
