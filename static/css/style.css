@@ -337,7 +337,7 @@ h1 {
 }
 
 /* 태블릿 */
-@media (min-width: 601px) and (max-width: 1024px) {
+@media (min-width: 401px) and (max-width: 1024px) {
     body {
         padding: 36px 32px;
     }
@@ -364,7 +364,7 @@ h1 {
 }
 
 /* 모바일 */
-@media (max-width: 600px) {
+@media (max-width: 400px) {
     body {
         padding: 24px 16px;
     }
