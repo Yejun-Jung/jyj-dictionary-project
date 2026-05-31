@@ -26,7 +26,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>⭐ 스크랩 보관함</h1>
+            <h1>⭐ 내 즐겨찾기</h1>
             {% if last_query %}
             <a href="/search?query={{ last_query }}" class="nav-btn">← 검색 화면으로</a>
             {% else %}
@@ -37,7 +37,7 @@
         {% if items|length == 0 %}
         <div class="empty-state favorites-empty">
             <span class="icon">📄</span>
-            <h2>스크랩한 자료가 없습니다</h2>
+            <h2>즐겨찾기한 자료가 없습니다</h2>
             <p>지식백과 검색기에서 유용한 표제어를 찾아 별표(★)를 눌러보세요.</p>
             {% if last_query %}
             <a href="/search?query={{ last_query }}" class="action-btn">🔍 자료 스크랩하러 가기</a>
