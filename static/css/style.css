@@ -57,6 +57,7 @@ h1 {
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
 }
 
 .nav-btn:hover {
@@ -312,7 +313,6 @@ h1 {
     margin-bottom: 30px;
 }
 
-/* 액션 버튼 (검색 화면으로 유도) */
 .action-btn {
     display: inline-flex;
     align-items: center;
@@ -326,6 +326,8 @@ h1 {
     font-size: 14.5px;
     box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
     transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
 }
 
 .action-btn:hover {
