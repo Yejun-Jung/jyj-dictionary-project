@@ -37,12 +37,34 @@
             document.querySelector('.search-box button').disabled = true;
             document.querySelector('.search-box button').innerText = '검색 중...';
         }
+
+        // 즐겨찾기 삭제 후 복귀 시 별표 상태 정확히 동기화
+        window.addEventListener('pageshow', function() {
+            // skip_scrape로 왔으면 URL 파라미터 제거
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('skip_scrape')) {
+                params.delete('skip_scrape');
+                const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                history.replaceState({}, '', cleanUrl);
+                return;
+            }
+
+            // 즐겨찾기 변경 플래그가 있으면 재스크래핑 없이 서버에서 새로 받아옴
+            if (sessionStorage.getItem('favorites_changed')) {
+                sessionStorage.removeItem('favorites_changed');
+                const query = new URLSearchParams(window.location.search).get('query');
+                if (query) {
+                    window.location.href = `/search?query=${encodeURIComponent(query)}&skip_scrape=true`;
+                }
+                return;
+            }
+        });
     </script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>지식백과 검색기</h1>
+            <a href="/" style="text-decoration:none;"><h1>지식백과 검색기</h1></a>
             <a href="/favorites" class="nav-btn">⭐ 내 즐겨찾기 목록</a>
         </div>
         

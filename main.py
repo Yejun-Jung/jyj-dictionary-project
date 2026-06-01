@@ -50,10 +50,11 @@ async def index(request: Request):
 
 
 @app.get("/search", response_class=HTMLResponse)
-async def search(request: Request, query: str = None):
+async def search(request: Request, query: str = None, skip_scrape: bool = False):
     db = mongodb.get_db()
     if query:
-        search_naver_encyc(query)
+        if not skip_scrape:
+            search_naver_encyc(query)
         items = list(db.encyclopedia.find({}, {"_id": False}))
     else:
         items = []
